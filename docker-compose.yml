@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    environment:
+      - MONGO_INITDB_DATABASE=finance-app
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin!
+    ports:
+      - 27017:27017
+    restart: unless-stopped
+    networks:
+      - dev-network
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongodb-express
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=admin!
+    ports:
+      - 8081:8081
+    restart: unless-stopped
+    networks:
+      - dev-network
+    depends_on:
+      - mongodb
+
+networks:
+  dev-network:
+    driver: bridge
