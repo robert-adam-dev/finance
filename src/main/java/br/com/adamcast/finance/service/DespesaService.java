@@ -5,9 +5,12 @@ import br.com.adamcast.finance.model.Despesa;
 import br.com.adamcast.finance.model.dto.DespesaDto;
 import br.com.adamcast.finance.repository.DespesaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,18 +21,63 @@ public class DespesaService {
 
     private final DespesaMapper despesaMapper = DespesaMapper.INSTANCE;
 
-    public DespesaDto criarNovaDespesa(DespesaDto despesaDto) {
+    @Transactional
+    public DespesaDto cadastraDespesa(DespesaDto despesaDto) {
         Despesa despesaSalva = despesaRepository.save(despesaMapper.toModel(despesaDto));
+
         return despesaMapper.toDto(despesaSalva);
     }
 
-    public List<DespesaDto> buscaTodasDespesas() {
+    public ResponseEntity<List<DespesaDto>> buscaTodasDespesas() {
         List<Despesa> todasAsDespesas = despesaRepository.findAll();
-        return todasAsDespesas.stream().map(despesaMapper::toDto).collect(Collectors.toList());
+
+        return ResponseEntity.ok(todasAsDespesas.stream().map(despesaMapper::toDto).collect(Collectors.toList()));
     }
 
-    public List<DespesaDto> buscaDespesaPelaDescricao(String descricao) {
+    public ResponseEntity<List<DespesaDto>> buscaDespesaPelaDescricao(String descricao) {
         List<Despesa> todasAsDespesas = despesaRepository.findByDescricaoContainingIgnoreCase(descricao);
-        return todasAsDespesas.stream().map(despesaMapper::toDto).collect(Collectors.toList());
+
+        return ResponseEntity.ok(todasAsDespesas.stream().map(despesaMapper::toDto).collect(Collectors.toList()));
+    }
+
+    public ResponseEntity<DespesaDto> buscaDespesaPeloId(String id) {
+        Optional<Despesa> despesa = despesaRepository.findById(id);
+
+        if (despesa.isPresent()) {
+            return ResponseEntity.ok(despesaMapper.toDto(despesa.get()));
+        }
+
+        return ResponseEntity.notFound().build();
+    }
+
+    @Transactional
+    public ResponseEntity<DespesaDto> atualizaDespesa(String id, DespesaDto despesaDto) {
+        Optional<Despesa> despesa = despesaRepository.findById(id);
+
+        if (despesa.isPresent()) {
+            Despesa despesaASerAtualizada = despesa.get();
+
+            despesaASerAtualizada.setDescricao(despesaDto.getDescricao());
+            despesaASerAtualizada.setValor(despesaDto.getValor());
+            despesaASerAtualizada.setData(despesaDto.getData());
+
+            Despesa despesaAtualizada = despesaRepository.save(despesaASerAtualizada);
+
+            return ResponseEntity.ok(despesaMapper.toDto(despesaAtualizada));
+        }
+
+        return ResponseEntity.notFound().build();
+    }
+
+    @Transactional
+    public ResponseEntity removerDespesa(String id) {
+        Optional<Despesa> despesa = despesaRepository.findById(id);
+
+        if (!despesa.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        despesaRepository.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 }
