@@ -23,9 +23,19 @@ public class ReceitaService {
 
     @Transactional
     public ReceitaDto cadastraReceita(ReceitaDto receitaDto) {
+        verificaSeReceitaJaExisteNoMesAtual(receitaDto);
         Receita receita = receitaRepository.save(receitaMapper.toModel(receitaDto));
 
         return receitaMapper.toDto(receita);
+    }
+
+    private void verificaSeReceitaJaExisteNoMesAtual(ReceitaDto receitaDto) {
+        Optional<Receita> receitaEncontrada = receitaRepository.findByDescricaoIgnoreCase(receitaDto.getDescricao());
+        if (receitaEncontrada.isPresent()) {
+            if (receitaDto.getData().getMonth() == receitaEncontrada.get().getData().getMonth()) {
+                throw new RuntimeException("Receita duplicada");
+            }
+        }
     }
 
     public ResponseEntity<List<ReceitaDto>> buscaTodasReceitas() {
@@ -52,6 +62,7 @@ public class ReceitaService {
 
     @Transactional
     public ResponseEntity<ReceitaDto> atualizaReceita(String id, ReceitaDto receitaDto) {
+
         Optional<Receita> receita = receitaRepository.findById(id);
 
         if (receita.isPresent()) {

@@ -23,6 +23,7 @@ public class DespesaService {
 
     @Transactional
     public DespesaDto cadastraDespesa(DespesaDto despesaDto) {
+        verificaSeDespesaJaExisteNoMesAtual(despesaDto);
         Despesa despesaSalva = despesaRepository.save(despesaMapper.toModel(despesaDto));
 
         return despesaMapper.toDto(despesaSalva);
@@ -79,5 +80,14 @@ public class DespesaService {
 
         despesaRepository.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    private void verificaSeDespesaJaExisteNoMesAtual(DespesaDto despesaDto) {
+        Optional<Despesa> despesaEncontrada = despesaRepository.findByDescricaoIgnoreCase(despesaDto.getDescricao());
+        if (despesaEncontrada.isPresent()) {
+            if (despesaDto.getData().getMonth() == despesaEncontrada.get().getData().getMonth()) {
+                throw new RuntimeException("Despesa duplicada");
+            }
+        }
     }
 }
