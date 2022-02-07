@@ -1,5 +1,7 @@
 package br.com.adamcast.finance.service;
 
+import br.com.adamcast.finance.exception.DespesaDuplicadaException;
+import br.com.adamcast.finance.exception.DespesaNaoEncontradaException;
 import br.com.adamcast.finance.mapper.DespesaMapper;
 import br.com.adamcast.finance.model.Despesa;
 import br.com.adamcast.finance.model.dto.DespesaDto;
@@ -22,7 +24,7 @@ public class DespesaService {
     private final DespesaMapper despesaMapper = DespesaMapper.INSTANCE;
 
     @Transactional
-    public DespesaDto cadastraDespesa(DespesaDto despesaDto) {
+    public DespesaDto cadastraDespesa(DespesaDto despesaDto) throws DespesaDuplicadaException {
         verificaSeDespesaJaExisteNoMesAtual(despesaDto);
         Despesa despesaSalva = despesaRepository.save(despesaMapper.toModel(despesaDto));
 
@@ -41,53 +43,48 @@ public class DespesaService {
         return ResponseEntity.ok(todasAsDespesas.stream().map(despesaMapper::toDto).collect(Collectors.toList()));
     }
 
-    public ResponseEntity<DespesaDto> buscaDespesaPeloId(String id) {
-        Optional<Despesa> despesa = despesaRepository.findById(id);
+    public ResponseEntity<DespesaDto> buscaDespesaPeloId(String id) throws DespesaNaoEncontradaException {
+        Optional<Despesa> despesa = verificaSeDespesaExiste(id);
 
-        if (despesa.isPresent()) {
-            return ResponseEntity.ok(despesaMapper.toDto(despesa.get()));
-        }
-
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(despesaMapper.toDto(despesa.get()));
     }
 
     @Transactional
-    public ResponseEntity<DespesaDto> atualizaDespesa(String id, DespesaDto despesaDto) {
-        Optional<Despesa> despesa = despesaRepository.findById(id);
+    public ResponseEntity<DespesaDto> atualizaDespesa(String id, DespesaDto despesaDto) throws DespesaNaoEncontradaException {
 
-        if (despesa.isPresent()) {
-            Despesa despesaASerAtualizada = despesa.get();
+        verificaSeDespesaExiste(id);
 
-            despesaASerAtualizada.setDescricao(despesaDto.getDescricao());
-            despesaASerAtualizada.setValor(despesaDto.getValor());
-            despesaASerAtualizada.setData(despesaDto.getData());
-
-            Despesa despesaAtualizada = despesaRepository.save(despesaASerAtualizada);
-
-            return ResponseEntity.ok(despesaMapper.toDto(despesaAtualizada));
-        }
-
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(despesaMapper.toDto(Despesa.builder()
+                .descricao(despesaDto.getDescricao())
+                .valor(despesaDto.getValor())
+                .data(despesaDto.getData())
+                .build()));
     }
 
     @Transactional
-    public ResponseEntity removerDespesa(String id) {
-        Optional<Despesa> despesa = despesaRepository.findById(id);
+    public ResponseEntity removerDespesa(String id) throws DespesaNaoEncontradaException {
 
-        if (!despesa.isPresent()) {
-            return ResponseEntity.notFound().build();
-        }
+        verificaSeDespesaExiste(id);
 
         despesaRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
 
-    private void verificaSeDespesaJaExisteNoMesAtual(DespesaDto despesaDto) {
+    private void verificaSeDespesaJaExisteNoMesAtual(DespesaDto despesaDto) throws DespesaDuplicadaException {
         Optional<Despesa> despesaEncontrada = despesaRepository.findByDescricaoIgnoreCase(despesaDto.getDescricao());
         if (despesaEncontrada.isPresent()) {
             if (despesaDto.getData().getMonth() == despesaEncontrada.get().getData().getMonth()) {
-                throw new RuntimeException("Despesa duplicada");
+                throw new DespesaDuplicadaException();
             }
         }
+    }
+
+    private Optional<Despesa> verificaSeDespesaExiste(String id) throws DespesaNaoEncontradaException {
+        Optional<Despesa> despesa = despesaRepository.findById(id);
+
+        if (!despesa.isPresent()) {
+            throw new DespesaNaoEncontradaException();
+        }
+        return despesa;
     }
 }

@@ -1,5 +1,7 @@
 package br.com.adamcast.finance.service;
 
+import br.com.adamcast.finance.exception.ReceitaDuplicadaException;
+import br.com.adamcast.finance.exception.ReceitaNaoEncontradaException;
 import br.com.adamcast.finance.mapper.ReceitaMapper;
 import br.com.adamcast.finance.model.Receita;
 import br.com.adamcast.finance.model.dto.ReceitaDto;
@@ -22,20 +24,11 @@ public class ReceitaService {
     private final ReceitaMapper receitaMapper = ReceitaMapper.INSTANCE;
 
     @Transactional
-    public ReceitaDto cadastraReceita(ReceitaDto receitaDto) {
+    public ReceitaDto cadastraReceita(ReceitaDto receitaDto) throws ReceitaDuplicadaException {
         verificaSeReceitaJaExisteNoMesAtual(receitaDto);
         Receita receita = receitaRepository.save(receitaMapper.toModel(receitaDto));
 
         return receitaMapper.toDto(receita);
-    }
-
-    private void verificaSeReceitaJaExisteNoMesAtual(ReceitaDto receitaDto) {
-        Optional<Receita> receitaEncontrada = receitaRepository.findByDescricaoIgnoreCase(receitaDto.getDescricao());
-        if (receitaEncontrada.isPresent()) {
-            if (receitaDto.getData().getMonth() == receitaEncontrada.get().getData().getMonth()) {
-                throw new RuntimeException("Receita duplicada");
-            }
-        }
     }
 
     public ResponseEntity<List<ReceitaDto>> buscaTodasReceitas() {
@@ -50,46 +43,48 @@ public class ReceitaService {
         return ResponseEntity.ok(todasAsReceitas.stream().map(receitaMapper::toDto).collect(Collectors.toList()));
     }
 
-    public ResponseEntity<ReceitaDto> buscaReceitaPeloId(String id) {
-        Optional<Receita> receita = receitaRepository.findById(id);
+    public ResponseEntity<ReceitaDto> buscaReceitaPeloId(String id) throws ReceitaNaoEncontradaException {
+        Optional<Receita> receita = verificaSeReceitaExiste(id);
 
-        if (receita.isPresent()) {
-            return ResponseEntity.ok(receitaMapper.toDto(receita.get()));
-        }
-
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(receitaMapper.toDto(receita.get()));
     }
 
     @Transactional
-    public ResponseEntity<ReceitaDto> atualizaReceita(String id, ReceitaDto receitaDto) {
+    public ResponseEntity<ReceitaDto> atualizaReceita(String id, ReceitaDto receitaDto) throws ReceitaNaoEncontradaException {
 
-        Optional<Receita> receita = receitaRepository.findById(id);
+        verificaSeReceitaExiste(id);
 
-        if (receita.isPresent()) {
-            Receita receitaASerAtualizada = receita.get();
-
-            receitaASerAtualizada.setDescricao(receitaDto.getDescricao());
-            receitaASerAtualizada.setValor(receitaDto.getValor());
-            receitaASerAtualizada.setData(receitaDto.getData());
-
-            Receita receitaAtualizada = receitaRepository.save(receitaASerAtualizada);
-
-            return ResponseEntity.ok(receitaMapper.toDto(receitaAtualizada));
-        }
-
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(receitaMapper.toDto(Receita.builder()
+                .descricao(receitaDto.getDescricao())
+                .data(receitaDto.getData())
+                .valor(receitaDto.getValor())
+                .build()));
     }
 
     @Transactional
-    public ResponseEntity removerReceita(String id) {
+    public ResponseEntity removerReceita(String id) throws ReceitaNaoEncontradaException {
+        verificaSeReceitaExiste(id);
+
+        receitaRepository.deleteById(id);
+
+        return ResponseEntity.ok().build();
+    }
+
+    private void verificaSeReceitaJaExisteNoMesAtual(ReceitaDto receitaDto) throws ReceitaDuplicadaException {
+        Optional<Receita> receitaEncontrada = receitaRepository.findByDescricaoIgnoreCase(receitaDto.getDescricao());
+        if (receitaEncontrada.isPresent()) {
+            if (receitaDto.getData().getMonth() == receitaEncontrada.get().getData().getMonth()) {
+                throw new ReceitaDuplicadaException();
+            }
+        }
+    }
+
+    private Optional<Receita> verificaSeReceitaExiste(String id) throws ReceitaNaoEncontradaException {
         Optional<Receita> receita = receitaRepository.findById(id);
 
         if (!receita.isPresent()) {
-            return ResponseEntity.notFound().build();
-
+            throw new ReceitaNaoEncontradaException();
         }
-
-        receitaRepository.deleteById(id);
-        return ResponseEntity.ok().build();
+        return receita;
     }
 }

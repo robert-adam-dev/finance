@@ -1,5 +1,7 @@
 package br.com.adamcast.finance.controller;
 
+import br.com.adamcast.finance.exception.ReceitaDuplicadaException;
+import br.com.adamcast.finance.exception.ReceitaNaoEncontradaException;
 import br.com.adamcast.finance.model.dto.ReceitaDto;
 import br.com.adamcast.finance.service.ReceitaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,7 @@ public class ReceitaController {
     }
 
     @PostMapping
-    public ResponseEntity<ReceitaDto> cadastraReceita(@RequestBody @Valid ReceitaDto receitaDto, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<ReceitaDto> cadastraReceita(@RequestBody @Valid ReceitaDto receitaDto, UriComponentsBuilder uriBuilder) throws ReceitaDuplicadaException {
 
         ReceitaDto receita = receitaService.cadastraReceita(receitaDto);
 
@@ -38,17 +40,17 @@ public class ReceitaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReceitaDto> mostraReceitaPeloId(@PathVariable String id) {
+    public ResponseEntity<ReceitaDto> mostraReceitaPeloId(@PathVariable String id) throws ReceitaNaoEncontradaException {
         return receitaService.buscaReceitaPeloId(id);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ReceitaDto> atualizaReceita(@PathVariable String id, @RequestBody @Valid ReceitaDto receitaDto) {
+    public ResponseEntity<ReceitaDto> atualizaReceita(@PathVariable String id, @RequestBody @Valid ReceitaDto receitaDto) throws ReceitaNaoEncontradaException {
         return receitaService.atualizaReceita(id, receitaDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity removerReceita(@PathVariable String id) {
+    public ResponseEntity removerReceita(@PathVariable String id) throws ReceitaNaoEncontradaException {
         return receitaService.removerReceita(id);
     }
 }
