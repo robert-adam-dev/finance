@@ -2,6 +2,7 @@ package br.com.adamcast.finance.controller;
 
 import br.com.adamcast.finance.exception.DespesaDuplicadaException;
 import br.com.adamcast.finance.exception.DespesaNaoEncontradaException;
+import br.com.adamcast.finance.model.Categoria;
 import br.com.adamcast.finance.model.dto.DespesaDto;
 import br.com.adamcast.finance.service.DespesaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/despesas")
@@ -31,6 +33,7 @@ public class DespesaController {
 
     @PostMapping
     public ResponseEntity<DespesaDto> cadastraDespesa(@RequestBody @Valid DespesaDto despesaDto, UriComponentsBuilder uriBuilder) throws DespesaDuplicadaException {
+
         DespesaDto despesa = despesaService.cadastraDespesa(despesaDto);
 
         URI uri = uriBuilder.path("/api/v1/despesas/{id}").buildAndExpand(despesa.getId()).toUri();

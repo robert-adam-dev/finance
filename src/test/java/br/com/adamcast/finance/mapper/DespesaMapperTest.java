@@ -1,5 +1,6 @@
 package br.com.adamcast.finance.mapper;
 
+import br.com.adamcast.finance.model.Categoria;
 import br.com.adamcast.finance.model.Despesa;
 import br.com.adamcast.finance.model.dto.DespesaDto;
 import org.junit.jupiter.api.Assertions;
@@ -13,7 +14,7 @@ public class DespesaMapperTest {
     @Test
     public void shouldMapDespesaDtoToModel() {
 
-        DespesaDto despesaDto = new DespesaDto("123a", "Teste", new BigDecimal("500.00"), LocalDate.now());
+        DespesaDto despesaDto = new DespesaDto("123a", "Teste", new BigDecimal("500.00"), LocalDate.now(), Categoria.OUTRAS);
 
         Despesa despesa = DespesaMapper.INSTANCE.toModel(despesaDto);
 
@@ -26,7 +27,7 @@ public class DespesaMapperTest {
     @Test
     public void shouldMapDespesaModelToDespesaDto() {
 
-        Despesa despesa = new Despesa("123a", "Teste", new BigDecimal("500"), LocalDate.now());
+        Despesa despesa = new Despesa("123a", "Teste", new BigDecimal("500"), LocalDate.now(), Categoria.OUTRAS);
 
         DespesaDto despesaDto = DespesaMapper.INSTANCE.toDto(despesa);
 
