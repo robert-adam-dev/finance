@@ -12,4 +12,5 @@ public interface DespesaRepository extends MongoRepository<Despesa, String> {
     List<Despesa> findByDescricaoContainingIgnoreCase(String descricao);
 
     Optional<Despesa> findByDescricaoIgnoreCase(String descricao);
+
 }

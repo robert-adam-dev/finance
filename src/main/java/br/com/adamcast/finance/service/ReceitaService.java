@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -86,5 +88,22 @@ public class ReceitaService {
             throw new ReceitaNaoEncontradaException();
         }
         return receita;
+    }
+
+    public List<ReceitaDto> buscaReceitaPeloMesEAno(Integer ano, Integer mes) {
+        List<Receita> receitasEncontradas = receitaRepository.findAll();
+
+        List<Receita> receitasDentroDoRangeDesejado = new ArrayList<>();
+
+        for (int i = 0; i < receitasEncontradas.size(); i++) {
+            LocalDate despesa = receitasEncontradas.get(i).getData();
+            if (despesa.getYear() == ano) {
+                if (despesa.getMonthValue() == mes) {
+                    receitasDentroDoRangeDesejado.add(receitasEncontradas.get(i));
+                }
+            }
+        }
+
+        return receitasDentroDoRangeDesejado.stream().map(receitaMapper::toDto).collect(Collectors.toList());
     }
 }

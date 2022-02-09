@@ -2,7 +2,6 @@ package br.com.adamcast.finance.controller;
 
 import br.com.adamcast.finance.exception.DespesaDuplicadaException;
 import br.com.adamcast.finance.exception.DespesaNaoEncontradaException;
-import br.com.adamcast.finance.model.Categoria;
 import br.com.adamcast.finance.model.dto.DespesaDto;
 import br.com.adamcast.finance.service.DespesaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/despesas")
@@ -54,5 +52,10 @@ public class DespesaController {
     @DeleteMapping("/{id}")
     public ResponseEntity removerDespesa(@PathVariable String id) throws DespesaNaoEncontradaException {
         return despesaService.removerDespesa(id);
+    }
+
+    @GetMapping("/{ano}/{mes}")
+    public List<DespesaDto> buscaDespesaPeloMesEAno(@PathVariable Integer ano, @PathVariable Integer mes) {
+        return despesaService.buscaDespesaPeloMesEAno(ano, mes);
     }
 }

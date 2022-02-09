@@ -53,4 +53,9 @@ public class ReceitaController {
     public ResponseEntity removerReceita(@PathVariable String id) throws ReceitaNaoEncontradaException {
         return receitaService.removerReceita(id);
     }
+
+    @GetMapping("/{ano}/{mes}")
+    public List<ReceitaDto> buscaReceitaPeloMesEAno(@PathVariable Integer ano, @PathVariable Integer mes) {
+        return receitaService.buscaReceitaPeloMesEAno(ano, mes);
+    }
 }
