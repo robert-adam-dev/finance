@@ -17,18 +17,19 @@ Antes de executar o projeto, basta ir na raiz do projeto e executar o comando ab
 docker-compose up --build -d
 ```
 
-Execute a classe FinanceApplication e faça requisições para criar uma nova despesa, por exemplo:
+Execute a classe FinanceApplication e acesse o link abaixo para a consultar a documentação da API.
 
 ```
-http://localhost:8080/api/v1/despesas
+http://localhost:8080/swagger-ui.html
 ```
 
 Links de referência
 
-* [Site oficial do Spring](https://spring.io/)
-* [Site oficial do Spring Initialzr](https://start.spring.io/)
-* [Documentação oficial do Lombok](https://projectlombok.org/)
-* [Documentação oficial do Map Struct](https://mapstruct.org/)
+* [Spring](https://spring.io/)
+* [Spring Initialzr](https://start.spring.io/)
+* [Lombok](https://projectlombok.org/)
+* [Map Struct](https://mapstruct.org/)
+* [Spring Doc](https://springdoc.org/)
 
 
 

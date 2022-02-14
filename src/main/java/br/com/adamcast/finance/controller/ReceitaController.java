@@ -21,7 +21,7 @@ public class ReceitaController {
     ReceitaService receitaService;
 
     @GetMapping
-    public ResponseEntity<List<ReceitaDto>> listaTodasReceitas(String descricao) {
+    public ResponseEntity<List<ReceitaDto>> listaTodasReceitas(@RequestParam(required = false) String descricao) {
         if (descricao == null) {
             return receitaService.buscaTodasReceitas();
         }

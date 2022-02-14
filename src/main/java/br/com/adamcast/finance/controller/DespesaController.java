@@ -21,7 +21,7 @@ public class DespesaController {
     DespesaService despesaService;
 
     @GetMapping
-    public ResponseEntity<List<DespesaDto>> listaTodasDespesas(String descricao) {
+    public ResponseEntity<List<DespesaDto>> listaTodasDespesas(@RequestParam(required = false) String descricao) {
         if (descricao == null) {
             return despesaService.buscaTodasDespesas();
         }
