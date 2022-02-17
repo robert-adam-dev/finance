@@ -11,7 +11,9 @@ Criação de uma API REST de Controle de Orçamento familiar.
 ## Funcionalidades
 
 :heavy_check_mark: Deve adicionar, consultar, atualizar e deletar despesas.
+
 :heavy_check_mark: Deve adicionar, consultar, atualizar e deletar receitas.
+
 :heavy_check_mark: Deve gerar um resumo mensal com o total de despesas, receitas, saldo mensal e o total gasto por categoria.
 
 ## Tarefas em aberto
